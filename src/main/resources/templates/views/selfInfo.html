@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>体育知识指导平台</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+
+    <style>
+        html, body {
+            padding: 0px;
+            margin: 0px;
+        }
+        .image {
+            height: 160px;
+            width: 100%;
+        }
+        .el-header {
+            padding: 0px;
+            width: 100%;
+            background-color: rgb(84, 92, 100);
+            position: fixed;
+            z-index: 111;
+        }
+        .el-main {
+            min-height: 800px;
+            max-width: 1200px;
+            margin: 80px auto;
+            padding: 0px 20px;
+        }
+        .el-footer {
+            min-height: 150px;
+            padding: 20px;
+            background-color: rgb(84, 92, 100);
+            color: white;
+            text-align: center;
+        }
+        .el-menu {
+            max-width: 1180px;
+            margin: 0 auto;
+        }
+        .el-tabs__item {
+            color: #303133 ;
+            font-weight: 500 ;
+            line-height: 40px ;
+            font-size: 15px;
+        }
+        .el-tabs__item:hover {
+            color: #409eff;
+        }
+        .el-col {
+            margin-bottom: 20px;
+        }
+        .tab {
+            width: 100%;
+        }
+        .text {
+            font-size: 14px;
+        }
+
+        .item {
+            margin-bottom: 18px;
+        }
+        .el-image__inner {
+            border-radius: 50%;
+            width: 80px;
+            height: 80px;
+            margin-top: 7px;
+            margin-left: 80px;
+        }
+        .el-form {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .image {
+            height: 130px;
+            width: 100%;
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <el-container>
+        <el-header>
+            <div id = "title">
+                <el-menu
+                        default-active="1"
+                        class="el-menu-demo"
+                        mode="horizontal"
+                        background-color="#545c64"
+                        text-color="#fff"
+                        active-text-color="#ffd04b">
+                    <el-menu-item><img src="/img/sport-title3.png" width="30px" height="30px"></img>  Sport Plant</el-menu-item>
+                    <el-menu-item index="1">首页</el-menu-item>
+                    <el-menu-item index="2">奖品池</el-menu-item>
+                    <el-menu-item index="3">联系客服</el-menu-item>
+                    <el-submenu index="4" style="float: right;">
+                        <template slot="title"><i class="el-icon-user" style="color: white;"></i>尉一飞</template>
+                        <el-menu-item index="4-1">个人中心</el-menu-item>
+                        <el-menu-item index="4-2" @click="signOut">退出登录</el-menu-item>
+                    </el-submenu>
+                </el-menu>
+            </div>
+        </el-header>
+
+        <el-main>
+            <el-row style="width: 1160px;">
+                <el-col :span="18" :offset="3">
+                    <el-card >
+                        <div slot="header" class="clearfix">
+                            <span>个人信息</span>
+                            <el-button style="float: right; padding: 3px 0" type="text" @click="editInfo"><i class="el-icon-edit"></i>编辑</el-button>
+                        </div>
+                        <div class="text item">
+                            <el-form ref="form" :model="form" label-width="80px">
+                                <el-form-item>
+                                    <el-image
+                                            src="/img/1.jpg"
+                                            fit="fill">
+                                    </el-image>
+                                    <div>
+                                        <el-button size="small" style="margin-left: 80px;margin-top: -20px;">更换头像</el-button>
+                                    </div>
+                                </el-form-item>
+                                <el-form-item label="名字:">
+                                    <el-input v-model="form.name" :disabled="true"></el-input>
+                                </el-form-item>
+                                <el-form-item label="账号:">
+                                    <el-input v-model="form.username" :disabled="true"></el-input>
+                                </el-form-item>
+                                <el-form-item label="手机:">
+                                    <el-input v-model="form.tel" :disabled="true"></el-input>
+                                </el-form-item>
+                                <el-form-item label="邮箱:">
+                                    <el-input v-model="form.email" :disabled="true"></el-input>
+                                </el-form-item>
+                                <el-form-item label="地址:">
+                                    <el-input v-model="form.address" :disabled="true"></el-input>
+                                </el-form-item>
+                                <el-form-item label="用户类型:">
+                                    <el-input v-model="form.type" :disabled="true"></el-input>
+                                </el-form-item>
+                            </el-form>
+                        </div>
+                    </el-card>
+                </el-col>
+            </el-row>
+
+
+                <el-row style="width: 1160px;">
+                    <el-col :span="18" :offset="3">
+                        <el-card>
+                            <div slot="header" >
+                                <span>我的课程</span>
+                            </div>
+                            <div>
+                                <el-row :gutter="20">
+                                    <el-col :span="6" v-for="(item, videoIndex) in pagination.list" :key="videoIndex">
+                                        <el-card :body-style="{ padding: '10px'}" style="min-height: 300px" >
+                                            <img :src="item.video.photo" class="image" @click="getVideoPage(item.video.id)">
+                                            <p style="font-size: 14px;"><i class="el-icon-tickets"></i>  {{item.video.videoName}}</p>
+                                            <p style="font-size: 12px;  margin: 12px 0px;"><i class="el-icon-user"></i>  {{item.video.user.name}}</p>
+                                            <p style="font-size: 12px;  margin: 12px 0px;"><i class="el-icon-date"></i>  {{item.video.createTime}}</p>
+                                            <p style="font-size: 12px;  margin: 12px 0px;color: #9199A1;"><i class="el-icon-tickets"></i>  {{item.video.videoDesc}}</p>
+                                        </el-card>
+                                    </el-col>
+                                </el-row>
+                            </div>
+                            <div id="pagination" style="margin-bottom: 20px">
+                                <div class="block" style="float: right;">
+                                    <el-pagination
+                                            @current-change="currentChange"
+                                            layout="prev, pager, next"
+                                            background
+                                            :current-page = "pagination.pageNum"
+                                            :page-size = "pagination.pageSize"
+                                            :total="pagination.total">
+                                    </el-pagination>
+                                </div>
+                            </div>
+                        </el-card>
+                    </el-col>
+                </el-row>
+
+                <el-dialog
+                        title="个人信息修改"
+                        :visible.sync="dialogVisible"
+                        width="50%"
+                        :before-close="handleClose">
+                    <el-form ref="form" :model="form" label-width="80px">
+                        <el-form-item label="名字:">
+                            <el-input v-model="dialogform.name"></el-input>
+                        </el-form-item>
+                        <el-form-item label="账号:">
+                            <el-input v-model="dialogform.username" ></el-input>
+                        </el-form-item>
+                        <el-form-item label="手机:">
+                            <el-input v-model="dialogform.tel" ></el-input>
+                        </el-form-item>
+                        <el-form-item label="邮箱:">
+                            <el-input v-model="dialogform.email" ></el-input>
+                        </el-form-item>
+                        <el-form-item label="地址:">
+                            <el-select v-model="dialogform.countryValue" placeholder="国家" @change="getProvince">
+                                <el-option
+                                        v-for="(item, index) in dialogform.country"
+                                        :key = "index"
+                                        :label="item.value"
+                                        :value="item.label">
+                                </el-option>
+                            </el-select>
+
+
+                        </el-form-item>
+                        <el-form-item>
+                            <el-select v-model="dialogform.provinceValue" placeholder="省" @change="getCity">
+                                <el-option
+                                        v-for="(item, index) in dialogform.province"
+                                        :key = "index"
+                                        :label="item.value"
+                                        :value="item.label">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item>
+                            <el-select v-model="dialogform.cityValue" placeholder="市">
+                                <el-option
+                                        v-for="(item, index) in dialogform.city"
+                                        :key = "index"
+                                        :label="item.value"
+                                        :value="item.label">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item>
+                            <el-button type="primary" style="width: 100px;margin-left: 40px;" @click="submit">保存</el-button>
+                        </el-form-item>
+                    </el-form>
+
+                </el-dialog>
+        </el-main>
+        <el-footer style="height: 60px;">@ by yyf</el-footer>
+    </el-container>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+    var vm = new Vue({
+        el: "#app",
+        data: {
+            form: {
+                id: "",
+                name: "",
+                username: "",
+                tel: "",
+                email: "",
+                address: "",
+                type: "普通用户"
+            },
+            dialogform: {
+                name: "",
+                username: "",
+                tel: "",
+                email: "",
+                country: [],
+                province:[],
+                city: [],
+                countryValue: "",
+                provinceValue: "",
+                cityValue: "",
+                is_vip: false
+            },
+            dialogVisible: false,
+            pagination:{
+                pageNum:1,
+                pageSize:4
+            }
+        },
+        methods: {
+            signOut() {
+                var token = window.localStorage["token"];
+                var formData = new FormData();
+                formData.append("token", token)
+                axios
+                    .post("/user/sign-out", formData)
+                    .then(function () {
+                        window.location.href="login"
+                    })
+            },
+            handleClose(done) {
+                this.$confirm('确认关闭？')
+                    .then(_ => {
+                        done();
+                    })
+                    .catch(_ => {});
+            },
+            editInfo() {
+                this.dialogVisible = true
+            },
+            submit() {
+                let _that = this
+                let data = {
+                    "id": this.form.id,
+                    "name": this.dialogform.name,
+                    "username": this.dialogform.username,
+                    "tel": this.dialogform.tel,
+                    "email": this.dialogform.email,
+                    "country": this.dialogform.countryValue,
+                    "province": this.dialogform.provinceValue,
+                    "city": this.dialogform.cityValue
+                }
+                axios
+                    .put("user/update", data)
+                    .then(function (response) {
+                        if (response.data.data === null) {
+                            _that.$message.error('保存失败');
+                        } else {
+                            _that.$message({
+                                message: '保存成功',
+                                type: 'success'
+                            });
+                            let tmp = response.data.data;
+                            _that.dialogform.name = tmp.name
+                            _that.dialogform.username = tmp.username
+                            _that.dialogform.email = tmp.email
+                            _that.dialogform.tel  = tmp.tel
+
+                            _that.form.name = tmp.name
+                            _that.form.username = tmp.username
+                            _that.form.email = tmp.email
+                            _that.form.tel = tmp.tel
+                            _that.form.id = tmp.id
+                            _that.form.address = tmp.countryName + "  " +tmp.provinceName + "  " +tmp.cityName
+                        }
+
+                        _that.dialogVisible = false
+                    })
+            },
+            getRegionByParentId(parentId, that) {
+                let data = new FormData();
+                let res;
+                data.append("parentId", parentId)
+                axios
+                    .post("/region/parentId", data)
+                    .then(function (response) {
+                        that.dialogform.country = response.data.data
+                    })
+            },
+            getProvince() {
+                let that = this;
+                let parentId = this.dialogform.countryValue
+                let data = new FormData();
+                data.append("parentId", parentId)
+                axios
+                    .post("/region/parentId", data)
+                    .then(function (response) {
+                        that.dialogform.province = response.data.data
+                    })
+            },
+            getCity() {
+                let data = new FormData();
+                let that = this;
+                let parentId = this.dialogform.provinceValue
+                data.append("parentId", parentId)
+                axios
+                    .post("/region/parentId", data)
+                    .then(function (response) {
+                        that.dialogform.city = response.data.data
+                    })
+            },
+            currentChange(val) {
+                this.pagination.pageNum = val
+                let page = this.pagination
+                let that = this
+                axios
+                    .post("order/getSelfVideo", {"pageSize": page.pageSize, "pageNum": page.pageNum})
+                    .then(function (response) {
+                        that.pagination = response.data.data
+                    })
+            },
+        },
+
+
+        mounted () {
+            let token = window.localStorage["token"];
+            let that = this
+            if (token) {
+                axios.defaults.headers.common["Token"] = token
+                axios
+                    .post("/user/token")
+                    .then(function (response) {
+                        if (response.data.data === false) {
+                            window.location.href = "login"
+                            return ;
+                        }
+
+                        //赋值
+                        let data = response.data.data
+                        that.dialogform.name = data.name
+                        that.dialogform.username = data.username
+                        that.dialogform.email = data.email
+                        that.dialogform.tel  = data.tel
+
+                        that.form.name = data.name
+                        that.form.username = data.username
+                        that.form.email = data.email
+                        that.form.tel = data.tel
+                        that.form.id = data.id
+                        that.form.address = data.countryName + "  " +data.provinceName + "  " +data.cityName
+
+                        that.getRegionByParentId(0, that)
+                    })
+            } else {
+                window.location.href="login"
+            }
+            axios
+                .post("order/getSelfVideo", {"pageSize": this.pagination.pageSize, "pageNum": this.pagination.pageNum})
+                .then(function (response) {
+                    that.pagination = response.data.data
+                })
+        }
+    })
+</script>
+</body>
+</html>

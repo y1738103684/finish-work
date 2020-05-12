@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>体育知识指导平台</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+
+    <style>
+        html, body {
+            padding: 0px;
+            margin: 0px;
+        }
+
+        .el-header {
+            padding: 0px;
+            width: 100%;
+            background-color: rgb(84, 92, 100);
+            position: fixed;
+            z-index: 111;
+        }
+        .el-main {
+            min-height: 800px;
+            max-width: 1200px;
+            margin: 80px auto;
+            padding: 0px 20px;
+        }
+        .el-footer {
+            min-height: 150px;
+            padding: 20px;
+            background-color: rgb(84, 92, 100);
+            color: white;
+            text-align: center;
+        }
+
+
+    </style>
+</head>
+<body>
+
+<div id="gift">
+    <el-container>
+        <el-header>
+            <div id = "title">
+
+                <el-menu
+                        default-active="1"
+                        class="el-menu-demo"
+                        mode="horizontal"
+                        background-color="#545c64"
+                        text-color="#fff"
+                        active-text-color="#ffd04b">
+                    <el-menu-item><img src="/img/sport-title3.png" width="30px" height="30px"></img>  Sport Plant</el-menu-item>
+                    <el-menu-item index="1">首页</el-menu-item>
+                    <el-menu-item index="2">奖品池</el-menu-item>
+                    <el-menu-item index="3">联系客服</el-menu-item>
+                    <el-submenu index="4" style="float: right;">
+                        <template slot="title"><i class="el-icon-user" style="color: white;"></i>尉一飞</template>
+                        <el-menu-item index="4-1">个人中心</el-menu-item>
+                        <el-menu-item index="4-2" @click="signOut">退出登录</el-menu-item>
+                    </el-submenu>
+                </el-menu>
+            </div>
+        </el-header>
+
+        <el-main>
+            <el-card class="box-card">
+                <div slot="header" class="clearfix">
+                    <span>添加礼物</span>
+                </div>
+                <div class="text item">
+                    <el-row :gutter="20">
+                        <el-form :rules="rules" ref="form" :model="form">
+                            <el-col :span="7">
+                                <el-form-item prop="giftName">
+                                    <el-input v-model="form.giftName" placeholder="礼物名" ></el-input>
+                                </el-form-item>
+
+                            </el-col>
+                            <el-col :span="7">
+                                <el-form-item prop="giftPoints">
+                                    <el-input v-model.number="form.giftPoints" placeholder="兑换积分" ></el-input>
+                                </el-form-item>
+                            </el-col>
+                            <el-col :span="7">
+                                <el-upload
+                                        class="upload-demo"
+                                        ref="upload"
+                                        action="/gift/upload"
+                                        :limit="1"
+                                        :file-list="fileList"
+                                        :on-success="uploadSuccess"
+                                        :data="{name: form.giftName, points: form.giftPoints}"
+                                        :auto-upload="false">
+                                    <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
+                                    <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+                                </el-upload>
+                            </el-col>
+                            <el-col :span="3">
+                                <el-button type="primary" size="small" @click="upload('form')"><i class="el-icon-circle-plus"></i>  添加</el-button>
+                            </el-col>
+                        </el-form>
+                    </el-row>
+                </div>
+            </el-card>
+
+
+            <el-card class="box-card" style="margin-top: 20px;">
+                <div slot="header" class="clearfix">
+                    <span>礼物信息</span>
+                </div>
+                <div class="text item">
+                    <el-table
+                            :data="pagination.list"
+                            style="width: 1200px">
+                        <el-table-column
+                                prop="index+1"
+                                label="编号"
+                                type="index"
+                        >
+                        </el-table-column>
+                        <el-table-column
+                                label="图片"
+                        >
+                            <template   slot-scope="scope">
+                                <el-image
+                                        style="width: 70px; height: 70px"
+                                        :src="scope.row.photo"
+                                        fit="fill"></el-image>
+                            </template>
+
+                        </el-table-column>
+                        <el-table-column
+                                prop="name"
+                                label="礼物名"
+                        >
+                        </el-table-column>
+                        <el-table-column
+                                prop="points"
+                                label="积分"
+                        >
+                        </el-table-column>
+                        <el-table-column
+                                prop="date"
+                                label="操作"
+                        >
+                            <a>删除</a>
+                        </el-table-column>
+                    </el-table>
+                </div>
+                <el-pagination
+                        style="float: right;margin-top: 20px"
+                        @current-change="currentChange"
+                        layout="prev, pager, next"
+                        background
+                        :current-page = "pagination.pageNum"
+                        :page-size = "pagination.pageSize"
+                        :total="pagination.total">
+                </el-pagination>
+            </el-card>
+
+
+        </el-main>
+        <el-footer style="height: 60px;">@ by yyf</el-footer>
+    </el-container>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+    var vm = new Vue({
+        el: "#gift",
+        data: {
+            form: {
+                giftName:"",
+                giftPoints:"",
+                giftPhoto:"",
+            },
+            pagination: {
+                pageNum: 1,
+                pageSize: 8
+            },
+            fileList: [],
+            rules: {
+                giftName: [
+                    { required: true, message: '请输入礼物名'}
+                ],
+                giftPoints: [
+                    { required: true, message: '请输入礼物积分' },
+                    {
+                        validator(rule, value, callback) {
+                            if (Number.isInteger(Number(value)) && value >= 0) {
+                                callback()
+                            } else {
+                                callback(new Error('请正确输入礼物积分'))
+                            }
+                        }
+                    }
+                ]
+            }
+        },
+        methods: {
+            signOut() {
+                var token = window.localStorage["token"];
+                var formData = new FormData();
+                formData.append("token", token)
+                axios
+                    .post("/user/sign-out", formData)
+                    .then(function () {
+                        window.location.href="login"
+                    })
+            },
+            upload(formName) {
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        this.$refs.upload.submit();
+                    }
+                })
+
+            },
+            uploadSuccess(response, file, fileList) {
+                if (response.data) {
+                    this.$message('上传成功!!!');
+                    let _that = this
+                    let page = _that.pagination
+                    axios
+                        .post("/gift/show", {"pageNum": page.pageNum, "pageSize": page.pageSize})
+                        .then(function (response) {
+                            _that.pagination = response.data.data
+                        })
+                } else {
+                    this.$message('上传失败!!!');
+                }
+            },
+            currentChange(val) {
+                this.pagination.pageNum = val
+                let page = this.pagination
+                let that = this
+                axios
+                    .post("/gift/show", {"pageNum": page.pageNum, "pageSize": page.pageSize})
+                    .then(function (response) {
+                        that.pagination = response.data.data
+                    })
+            }
+        },
+        mounted() {
+            let _that = this
+            let page = _that.pagination
+            axios
+                .post("/gift/show", {"pageNum": page.pageNum, "pageSize": page.pageSize})
+                .then(function (response) {
+                    _that.pagination = response.data.data
+                })
+        }
+    })
+</script>
+</body>
+</html>

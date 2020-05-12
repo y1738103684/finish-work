@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nuc.finish.dao.OrderMapper" >
+    <select id="selectByVideoIdAndUserId" resultType="com.nuc.finish.pojo.Order">
+        select * from order_info where video_id=#{videoId} and user_id=#{userId}
+    </select>
+
+    <insert id="insertOrder">
+        insert into order_info(video_id, video_name, user_id, order_status, order_time, update_time, create_time)
+        values (#{order.videoId}, #{order.videoName}, #{order.userId}, 0, #{order.orderTime}, #{order.updateTime}, #{order.createTime})
+    </insert>
+
+    <select id="listByUserId" resultType="com.nuc.finish.pojo.Order">
+        select * from order_info where user_id=#{userId}
+    </select>
+</mapper>

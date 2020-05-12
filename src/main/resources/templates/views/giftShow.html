@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>体育知识指导平台</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+
+    <style>
+        html, body {
+            padding: 0px;
+            margin: 0px;
+        }
+        body {
+            background-color: rgba(250, 250, 250, 0.3);
+        }
+
+        .el-header {
+            padding: 0px;
+            width: 100%;
+            background-color: rgb(84, 92, 100);
+            position: fixed;
+            z-index: 111;
+        }
+        .el-main {
+            min-height: 800px;
+            max-width: 1200px;
+            margin: 80px auto;
+            padding: 0px 20px;
+        }
+        .el-footer {
+            min-height: 150px;
+            padding: 20px;
+            background-color: rgb(84, 92, 100);
+            color: white;
+            text-align: center;
+        }
+        .main-title {
+            max-width: 310px;
+            min-height: 70px;
+            line-height: 70px;
+            margin: 0px auto;
+            font-size: 36px;
+            font-weight: 700;
+        }
+        .main-title i {
+            color: #606266;
+        }
+        .main-title span {
+            color: #606266;
+        }
+        .main-gift {
+            width: 1160px;
+            margin-bottom: 20px;
+        }
+
+        .main-gift .el-image {
+            width: 100%;
+            height: 100%;
+            border-radius: 10px;
+        }
+
+        .gift-title {
+            margin: 10px 0;
+        }
+        .gift-point {
+            color:#909399;
+            font-size:13px;
+            margin: 10px 0px;
+            margin-right: 10px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <el-container>
+        <el-header>
+            <div id = "title">
+
+                <el-menu
+                        default-active="1"
+                        class="el-menu-demo"
+                        mode="horizontal"
+                        background-color="#545c64"
+                        text-color="#fff"
+                        active-text-color="#ffd04b">
+                    <el-menu-item><img src="/img/sport-title3.png" width="30px" height="30px"></img>  Sport Plant</el-menu-item>
+                    <el-menu-item index="1">首页</el-menu-item>
+                    <el-menu-item index="2">奖品池</el-menu-item>
+                    <el-menu-item index="3">联系客服</el-menu-item>
+                    <el-submenu index="4" style="float: right;">
+                        <template slot="title"><i class="el-icon-user" style="color: white;"></i>尉一飞</template>
+                        <el-menu-item index="4-1">个人中心</el-menu-item>
+                        <el-menu-item index="4-2" @click="signOut">退出登录</el-menu-item>
+                    </el-submenu>
+                </el-menu>
+            </div>
+        </el-header>
+
+        <el-main>
+            <div id="main-title" class="main-title">
+                <i class="el-icon-s-grid"></i>
+                <span>会员优选礼物</span>
+                <i class="el-icon-s-grid"></i>
+            </div>
+            <div id="main-gift" class="main-gift">
+                <el-row>
+                    <el-col style="margin-top: 20px" :span="4"  v-for="(gift, index) in pagination.list" :key = "index" :offset="(index+1) % 5 === 1 ? 0 : 1 " >
+                        <el-card :body-style="{ padding: '15px' }">
+
+                            <el-image :src="gift.photo" fit="fill" style="width: 151px; height: 100px"></el-image>
+                            <div style="margin: 14px 0px">
+                                <p class="gift-title">{{gift.name}}</p>
+                                <span class="gift-point">积分: {{gift.points}} </span> <el-tag type="danger" size="small">会员专享</el-tag>
+                            </div>
+                            <div>
+                                <el-button type="warning" size="small" style="width: 100%;" @click="exchangeGift(gift.id, gift.points)">立即兑换</el-button>
+                            </div>
+                        </el-card>
+                    </el-col>
+                </el-row>
+
+                <el-pagination
+                        style="float: right;margin-top: 20px;margin-bottom: 20px"
+                        @current-change="currentChange"
+                        layout="prev, pager, next"
+                        background
+                        :current-page = "pagination.pageNum"
+                        :page-size = "pagination.pageSize"
+                        :total="pagination.total">
+                </el-pagination>
+
+            </div>
+        </el-main>
+        <el-footer style="height: 60px;">@ by yyf</el-footer>
+    </el-container>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+    var vm = new Vue({
+        el: "#app",
+        data: {
+            pagination: {
+                pageNum: 1,
+                pageSize: 15
+            }
+        },
+        methods: {
+            currentChange(val) {
+                this.pagination.pageNum = val
+                let page = this.pagination
+                let that = this
+                axios
+                    .post("/gift/show", {"pageNum": page.pageNum, "pageSize": page.pageSize})
+                    .then(function (response) {
+                        that.pagination = response.data.data
+                    })
+            },
+            exchangeGift(id, point) {
+                let token = window.localStorage["token"];
+                if (token) {
+                    let that = this
+                    axios.defaults.headers.common["Token"] = token
+                    axios
+                        .post("/user/token")
+                        .then(function (response) {
+                            if (response.data.data === false) {
+                                window.location.href = "login"
+                                return;
+                            }
+                        })
+                }
+                let that = this
+               axios
+                .post("/gift/exchange", {"id": id, "points": point})
+                .then(function (response) {
+                    let data = response.data.data
+                    let status = data.label;
+                    if (status === 1) {
+                        that.$message(data.value);
+                    } else if (status === 2) {
+                        that.$message(data.value);
+                    } else if (status === 3) {
+                        that.$message({
+                            message: data.value,
+                            type: 'success'
+                        });
+                    } else {
+                        that.$message({
+                            message: data.value,
+                            type: 'warning'
+                        });
+                    }
+                })
+            }
+        },
+        mounted() {
+            let _that = this
+            let page = _that.pagination
+            axios
+                .post("/gift/show", {"pageNum": page.pageNum, "pageSize": page.pageSize})
+                .then(function (response) {
+                    _that.pagination = response.data.data
+                })
+        }
+    })
+</script>
+</body>
+</html>

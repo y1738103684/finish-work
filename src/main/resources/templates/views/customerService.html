@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>体育知识指导平台</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+
+    <style>
+        html, body {
+            padding: 0px;
+            margin: 0px;
+        }
+        body {
+            background-color: rgba(250, 250, 250, 0.3);
+        }
+
+        .el-header {
+            padding: 0px;
+            width: 100%;
+            background-color: rgb(84, 92, 100);
+            position: fixed;
+            z-index: 111;
+        }
+        .el-main {
+            min-height: 800px;
+            max-width: 1200px;
+            margin: 80px auto;
+            padding: 0px 20px;
+        }
+        .el-footer {
+            min-height: 150px;
+            padding: 20px;
+            background-color: rgb(84, 92, 100);
+            color: white;
+            text-align: center;
+        }
+        .el-main .el-row {
+            width: 1160px;
+        }
+        .chat {
+            width: 100%;
+            height: 450px;
+            background-color: #EBEEF5 ;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
+            overflow: auto;
+        }
+        .chat-side {
+            width: 100%;
+            height: 650px;
+            background-color: rgba(250, 250, 250, 0.3);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04)
+        }
+        .chat-send {
+            width: 100%;
+            height: 200px;
+            background-color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04)
+        }
+        .chat-side .box-card {
+            width: 100%;
+            height: 99.5%;
+            background-color: transparent;
+        }
+        .service-font {
+            font-size: 12px;
+            color: #909399;
+            margin: 10px 0px;
+            margin-left: 30px;
+        }
+        .text .el-image {
+            width: 130px;
+            height: 150px;
+            margin: 20px 60px;
+        }
+        .text {
+            width: 100%;
+        }
+        .chat p {
+            color: #909399;
+            font-size: 12px;
+            text-align: center;
+            padding: 10px 10px;
+            margin: 0;
+        }
+        .chat .el-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            float: left;
+        }
+        .chat-info {
+            margin: 20px;
+            width: 95%;
+            min-height: 50px;
+        }
+        .chat-box-card {
+            background-color: white;
+            float: left;
+        }
+        .chat-box-card-right {
+            background-color: white;
+            float: right;
+        }
+        .float-left {
+            float: left;
+        }
+        .float-right {
+            float: right;
+        }
+        .chat-info .el-card__body {
+            padding: 5px;
+        }
+        .el-textarea__inner {
+            margin-top: 20px;
+            border: 0px;
+        }
+        .send-design {
+            font-size: 16px;
+            font-weight: 900;
+            color: #909399;
+            margin-left: 30px;
+            margin-top: 10px;
+            float: left;
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="app">
+    <el-container>
+        <el-header>
+            <div id = "title">
+
+                <el-menu
+                        default-active="1"
+                        class="el-menu-demo"
+                        mode="horizontal"
+                        background-color="#545c64"
+                        text-color="#fff"
+                        active-text-color="#ffd04b">
+                    <el-menu-item><img src="/img/sport-title3.png" width="30px" height="30px">  Sport Plant</el-menu-item>
+                    <el-menu-item index="1">首页</el-menu-item>
+                    <el-menu-item index="2">奖品池</el-menu-item>
+                    <el-menu-item index="3">联系客服</el-menu-item>
+                    <el-submenu index="4" style="float: right;">
+                        <template slot="title"><i class="el-icon-user" style="color: white;"></i>{{userFrom.username}}</template>
+                        <el-menu-item index="4-1">个人中心</el-menu-item>
+                        <el-menu-item index="4-2" @click="signOut">退出登录</el-menu-item>
+                    </el-submenu>
+                </el-menu>
+            </div>
+        </el-header>
+
+        <el-main>
+            <el-row>
+                <el-col :span="18" style="float: left;">
+                    <div id = "chat" class="chat">
+                        <p>体育知识平台客服为您服务, 希望您能满意</p>
+                        <p>{{date}}</p>
+
+                        <div class="chat-info" v-if="userFrom.id != 1">
+                            <el-image src="/img/service2.png" fit="fill"></el-image>
+                            <el-card class="chat-box-card">
+                                <div>
+                                    <p>您好, 很高兴为您服务</p>
+                                </div>
+                            </el-card>
+                        </div>
+
+
+                        <div class="chat-info" v-for="(item, index) in contentArr" :key ="index">
+                            <el-image :src="item.userFrom === userFrom.id ? userFrom.photo : '/img/service2.png'" fit="fill" :style="{float: (item.userFrom === userFrom.id ? 'right' : 'left')}"></el-image>
+                                <el-card :class="item.userFrom === userFrom.id ? 'chat-box-card-right' : 'chat-box-card'">
+                                <div>
+                                    <p>{{item.content}}</p>
+                                </div>
+                            </el-card>
+                        </div>
+
+
+                    </div>
+                </el-col>
+                <el-col :span="6" style="float:right;">
+                    <div class="chat-side">
+                        <el-card class="box-card">
+                            <div slot="header" class="clearfix">
+                                <span>客服信息</span>
+                            </div>
+                            <div class="text">
+                                <el-image src="/img/service3.png" fit="fill"></el-image>
+                                <div class="service-font"><i class="el-icon-user-solid"></i>&nbsp;&nbsp;所在部门:&nbsp;&nbsp; 客户服务中心</div>
+                                <div class="service-font"><i class="el-icon-phone"></i>&nbsp;&nbsp;固定电话:&nbsp;&nbsp; 086-28556666</div>
+                                <div class="service-font"><i class="el-icon-location-outline"></i>&nbsp;&nbsp;联系地址:&nbsp;&nbsp; 北京市海淀区上奥世纪</div>
+                            </div>
+                        </el-card>
+                    </div>
+                </el-col>
+                <el-col :span="18" style="float: left;">
+                    <div class="chat-send">
+                        <el-input type="textarea" :rows="6" v-model="comment"></el-input>
+                        <i class="send-design">Design By yyf</i>
+                        <el-button type="primary" size="small" style="float: right; margin: 10px;" @click="submit">发送</el-button>
+                    </div>
+                </el-col>
+            </el-row>
+        </el-main>
+        <el-footer style="height: 60px;">@ by yyf</el-footer>
+    </el-container>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+    var vm = new Vue({
+        el: "#app",
+        data: {
+            date: new Date(),
+            comment: "",
+            userTo: {},
+            userFrom: {},
+            contentArr:[]
+        },
+        methods: {
+            signOut() {
+                var token = window.localStorage["token"];
+                var formData = new FormData();
+                formData.append("token", token)
+                axios
+                    .post("/user/sign-out", formData)
+                    .then(function () {
+                        window.location.href="login"
+                    })
+            },
+          submit() {
+              let _that = this
+              let vo = {
+                  userTo: this.userTo.id,
+                  userFrom: this.userFrom.id,
+                  content: this.comment
+              }
+              axios
+              .post("/chat/insert", vo)
+              .then(function (response) {
+                    if (response.data.data > 0) {
+                        _that.contentArr.push(vo)
+                        _that.comment = ""
+                        _that.$nextTick(function(){
+                            let div = document.getElementById('chat');
+                            div.scrollTop = div.scrollHeight;
+                        })
+                    }
+              })
+          },
+           newContent(that) {
+               let vo = {
+                   userTo: that.userFrom.id,
+                   userFrom: that.userTo.id
+               }
+               axios
+                   .post("/chat/selectByToAndFrom", vo)
+                   .then(function (response) {
+                       that.contentArr.push(response.data.data)
+                       that.$nextTick(function(){
+                           let div = document.getElementById('chat');
+                           div.scrollTop = div.scrollHeight;
+                       })
+                       that.newContent(that)
+                   })
+           },
+            chatBasicData(that) {
+                let vo = {
+                    userTo: that.userFrom.id,
+                    userFrom: that.userTo.id
+                }
+                axios
+                    .post("/chat/chatBasicData", vo)
+                    .then(function (response) {
+                        that.contentArr = response.data.data
+                        that.$nextTick(function(){
+                            let div = document.getElementById('chat');
+                            div.scrollTop = div.scrollHeight;
+                        })
+                    })
+            }
+        },
+        mounted() {
+            let token = window.localStorage["token"];
+            let _that = this
+            if (token) {
+                axios.defaults.headers.common["Token"] = token
+                axios
+                    .post("/user/token")
+                    .then(function (response) {
+                        if (response.data.data === false) {
+                            window.location.href = "login";
+                        } else {
+                            _that.userFrom = response.data.data
+                            if (_that.userFrom.id != 1) {
+                                _that.userTo.id = 1
+                            } else {
+                                _that.userTo.id = 2
+                            }
+                            _that.chatBasicData(_that)
+                            _that.newContent(_that)
+                        }
+                    })
+
+            } else {
+                window.location.href="login"
+            }
+
+
+        }
+
+
+
+    })
+</script>
+</body>
+</html>

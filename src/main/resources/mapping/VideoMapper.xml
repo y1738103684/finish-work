@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nuc.finish.dao.VideoMapper" >
+    <select id="listVideo" resultType="com.nuc.finish.pojo.Video">
+        select * from video_info
+        <where>
+            <if test="type != 0">
+                video_type = #{type}
+            </if>
+        </where>
+    </select>
+
+    <select id="selectVideoById" resultType="com.nuc.finish.pojo.Video">
+        select * from video_info where id = #{id}
+    </select>
+
+    <insert id="insertVideo" parameterType="com.nuc.finish.vo.VideoVO" keyProperty="vo.id" useGeneratedKeys="true">
+        insert into video_info(video_type, video_name, video_desc, user_id, play_number, address, last_play_time, price, update_time, create_time)
+        values (#{vo.videoType}, #{vo.videoName}, #{vo.videoDesc}, #{vo.userId}, 0, #{vo.address}, now(), #{vo.price}, now(), now())
+    </insert>
+
+    <select id="listByLimit" resultType="com.nuc.finish.pojo.Video">
+        select * from video_info limit #{low}
+    </select>
+
+    <update id="updatePhotoById" >
+        update video_info set photo = #{photo} where id = #{id}
+    </update>
+</mapper>

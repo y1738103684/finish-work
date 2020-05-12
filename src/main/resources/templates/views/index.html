@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>体育知识指导平台</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+
+    <style>
+        html, body {
+            padding: 0px;
+            margin: 0px;
+        }
+        body {
+            background-color: rgba(250, 250, 250, 0.3);
+        }
+        .card {
+            margin: 0 auto;
+            width: 1200px;
+        }
+        .tab {
+            margin: 0 auto;
+            width: 100%;
+            min-height: 600px;
+        }
+        .video-class {
+            width: 80%;
+            margin: 0 auto;
+            margin-top: 20px;
+        }
+        .image {
+            height: 160px;
+            width: 100%;
+        }
+        .el-header {
+            padding: 0px;
+            width: 100%;
+            background-color: rgb(84, 92, 100);
+            position: fixed;
+            z-index: 111;
+        }
+        .el-main {
+            min-height: 800px;
+            max-width: 1200px;
+            margin: 80px auto;
+            padding: 0px 20px;
+        }
+        .el-footer {
+            min-height: 150px;
+            padding: 20px;
+            background-color: rgb(84, 92, 100);
+            color: white;
+            text-align: center;
+        }
+        .el-menu {
+            max-width: 1180px;
+            margin: 0 auto;
+        }
+        .el-tabs__item {
+            color: #303133 ;
+            font-weight: 500 ;
+            line-height: 40px ;
+            font-size: 15px;
+        }
+        .el-tabs__item:hover {
+            color: #409eff;
+        }
+        .el-col {
+            margin-bottom: 20px;
+        }
+        .tab {
+            width: 100%;
+        }
+        a {
+            text-decoration: none;
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="video">
+    <el-container>
+        <el-header>
+            <div id = "title">
+
+                <el-menu
+                        default-active="1"
+                        class="el-menu-demo"
+                        mode="horizontal"
+                        background-color="#545c64"
+                        text-color="#fff"
+                        active-text-color="#ffd04b">
+                    <el-menu-item><img src="/img/sport-title3.png" width="30px" height="30px"> Sport Plant</el-menu-item>
+                    <el-menu-item index="1"><a href="/index">首页</a></el-menu-item>
+                    <el-menu-item index="2"><a href="/giftManager">奖品池</a></el-menu-item>
+                    <el-menu-item index="3">联系客服</el-menu-item>
+                    <el-submenu index="4" style="float: right;">
+                        <template slot="title"><i class="el-icon-user" style="color: white;"></i>尉一飞</template>
+                        <el-menu-item index="4-1">个人中心</el-menu-item>
+                        <el-menu-item index="4-2" @click="signOut">退出登录</el-menu-item>
+                    </el-submenu>
+                </el-menu>
+            </div>
+        </el-header>
+
+        <el-main>
+            <el-carousel :interval="4000" indicator-position="outside" height="500px" >
+                <el-carousel-item >
+                    <img src="/img/gaoqing6.jpg" width="100%" height="100%">
+                </el-carousel-item>
+                <el-carousel-item >
+                    <img src="/img/gaoqing1.jpg"  width="100%" height="100%">
+                </el-carousel-item>
+                <el-carousel-item >
+                    <img src="/img/gaoqing3.jpg"  width="100%" height="100%">
+                </el-carousel-item>
+                <el-carousel-item >
+                    <img src="/img/gaoqing2.jpg"  width="100%" height="100%">
+                </el-carousel-item>
+                <el-carousel-item >
+                    <img src="/img/gaoqing4.jpg"  width="100%" height="100%">
+                </el-carousel-item>
+                <el-carousel-item >
+                    <img src="/img/gaoqing5.jpg"  width="100%" height="100%">
+                </el-carousel-item>
+            </el-carousel>
+
+
+            <div id="tab" class="tab">
+
+                <el-tabs  v-model="activeName" @tab-click="handleClick">
+
+                    <el-tab-pane label="全部" name="0"  >
+
+                        <div id = "card" class="card">
+                            <el-row :gutter="20">
+                                <el-col :span="6" v-for="(item, index) in pagination.list" :key="index">
+                                    <el-card :body-style="{ padding: '10px' }">
+                                        <img :src="item.photo" class="image" @click="getVideoPage(item.id)">
+                                        <p style="font-size: 14px;"><i class="el-icon-tickets"></i>  {{item.videoName}}</p>
+                                        <p style="font-size: 12px;  margin: 12px 0px;"><i class="el-icon-user"></i>  {{item.user.name}}</p>
+                                        <p style="font-size: 12px;  margin: 12px 0px;"><i class="el-icon-date"></i>  {{item.createTime}}</p>
+                                        <p style="font-size: 12px;  margin: 12px 0px;color: #9199A1;"><i class="el-icon-tickets"></i>   {{item.videoDesc}}</p>
+                                    </el-card>
+                                </el-col>
+                            </el-row>
+                        </div>
+                    </el-tab-pane>
+                    <el-tab-pane v-for="(item, index) in videoType" :label="item.value" :name="item.label" :key="index">
+                        <div id = "index" class="card">
+                            <el-row :gutter="20">
+                                <el-col :span="6" v-for="(video, videoIndex) in pagination.list" :key="'video'+ videoIndex">
+                                    <el-card :body-style="{ padding: '10px' }">
+                                        <img :src="video.photo" class="image" @click="getVideoPage(video.id)">
+                                        <p style="font-size: 14px;"><i class="el-icon-tickets"></i>  {{video.videoName}}</p>
+                                        <p style="font-size: 12px;  margin: 12px 0px;"><i class="el-icon-user"></i>  {{video.user.name}}</p>
+                                        <p style="font-size: 12px;  margin: 12px 0px;"><i class="el-icon-date"></i>  {{video.createTime}}</p>
+                                        <p style="font-size: 12px;  margin: 12px 0px;color: #9199A1;"><i class="el-icon-tickets"></i>  {{video.videoDesc}}</p>
+                                    </el-card>
+                                </el-col>
+                            </el-row>
+                        </div>
+                    </el-tab-pane>
+                </el-tabs>
+            </div>
+
+            <div id="pagination">
+                <div class="block" style="float: right;">
+                    <el-pagination
+                            @current-change="currentChange"
+                            layout="prev, pager, next"
+                            background
+                            :current-page = "pagination.pageNum"
+                            :page-size = "pagination.pageSize"
+                            :total="pagination.total">
+                    </el-pagination>
+                </div>
+            </div>
+
+            <div>
+                <el-dialog
+                        title="购买课程"
+                        :visible.sync="dialogVisible"
+                        width="30%"
+                        :before-close="handleClose">
+                    <span>您确定要购买该课程吗?</span>
+                    <span slot="footer" class="dialog-footer">
+                        <el-button @click="handleClose">取 消</el-button>
+                        <el-button type="primary" @click="handleConfirm">确 定</el-button>
+                    </span>
+                </el-dialog>
+            </div>
+        </el-main>
+<el-footer style="height: 60px;">@ by yyf</el-footer>
+</el-container>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+    var vm = new Vue({
+        el: "#video",
+        data: {
+            name: "",
+            desc: "",
+            prices: "",
+            type: 0,
+            videoId: "",
+            videoType:[],
+            pagination:{
+                pageNum: 0,
+                pageSize: 4,
+                pages: 0,
+                total: 0,
+                list: []
+            },
+            activeName: "0",
+            user: {},
+            dialogVisible:false
+        },
+        methods: {
+            submitUpload() {
+                this.$refs.upload.submit();
+            },
+            showVideo(that) {
+                axios
+                    .post("/video/show?", {"type": that.type,"pagination": that.pagination})
+                    .then(function (response) {
+                        that.pagination = response.data.data
+                    })
+            },
+            getVideoPage(videoId) {
+                if (this.user.id) {
+                    let data = new FormData()
+                    data.append("userId", this.user.id)
+                    data.append("videoId", videoId)
+                    let token = window.localStorage["token"];
+                    axios.defaults.headers.common["Token"] = token
+                    let _that = this
+                    axios
+                        .post("order/isExistOrder", data)
+                        .then(function (response) {
+                            if (response.data.data === true) {
+                                window.location.href = "showVideo?videoId=" + videoId
+                            } else if (response.data.data === 10001) {
+                                window.location.href = "login"
+                            } else {
+                                _that.dialogVisible = !_that.dialogVisible
+                                _that.videoId = videoId
+                            }
+                        })
+
+                } else {
+                    window.location.href = "login"
+                }
+
+            },
+            signOut() {
+                var token = window.localStorage["token"];
+                var formData = new FormData();
+                formData.append("token", token)
+                axios
+                    .post("/user/sign-out", formData)
+                    .then(function () {
+                        window.location.href="login"
+                    })
+            },
+            handleClick(tab, event) {
+                this.type = tab._props.name
+                this.$options.methods.showVideo(this)
+            },
+            currentChange(val) {
+                this.pagination.pageNum = val
+                let page = this.pagination
+                let that = this
+                axios
+                .post("/video/show", {"type": this.type, "pagination": page})
+                .then(function (response) {
+                    that.pagination = response.data.data
+                })
+            },
+            handleClose(done) {
+                this.$confirm('确认关闭？')
+                    .then(_ => {
+                        done();
+                    })
+                    .catch(_ => {});
+            },
+            handleConfirm() {
+                let formData = new FormData();
+                formData.append("videoId", this.videoId);
+                let _that = this
+                axios
+                .post("order/buyVideo", formData)
+                .then(function (response) {
+                    if (response.data.data) {
+                        _that.$message({
+                            message: '恭喜你，购买成功',
+                            type: 'success'
+                        });
+                        _that.dialogVisible = false
+                    } else {
+                        _that.$message.error('购买失败');
+                    }
+                })
+            }
+        },
+
+
+        mounted () {
+            //获取视频类型
+            var _that = this
+            axios
+                .post("/enum/video_type")
+                .then(function (response) {
+                    _that.videoType = response.data.data
+                })
+
+            //获取相关视频
+            axios
+                .post("/video/show", {type: 0})
+                .then(function (response) {
+                    _that.pagination = response.data.data
+                })
+
+            //获取用户信息
+            let token = window.localStorage["token"];
+            axios.defaults.headers.common["Token"] = token
+            axios
+                .post("/user/token")
+                .then(function (response) {
+                    _that.user = response.data.data
+                })
+        }
+    })
+</script>
+</body>
+</html>

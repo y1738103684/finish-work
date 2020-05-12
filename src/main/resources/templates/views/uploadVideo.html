@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>体育知识指导平台</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+
+    <style>
+        html, body {
+            padding: 0px;
+            margin: 0px;
+        }
+        body {
+            background-color: rgba(250, 250, 250, 0.3);
+        }
+        .card {
+            margin: 0 auto;
+            width: 1200px;
+        }
+        .tab {
+            margin: 0 auto;
+            width: 100%;
+            min-height: 600px;
+        }
+        .video-class {
+            width: 80%;
+            margin: 0 auto;
+            margin-top: 20px;
+        }
+        .image {
+            height: 160px;
+            width: 100%;
+        }
+        .el-header {
+            padding: 0px;
+            width: 100%;
+            background-color: rgb(84, 92, 100);
+            position: fixed;
+            z-index: 111;
+        }
+        .el-main {
+            min-height: 800px;
+            max-width: 1200px;
+            margin: 80px auto;
+            padding: 0px 20px;
+        }
+        .el-footer {
+            min-height: 150px;
+            padding: 20px;
+            background-color: rgb(84, 92, 100);
+            color: white;
+            text-align: center;
+        }
+        .el-menu {
+            max-width: 1180px;
+            margin: 0 auto;
+        }
+        .el-tabs__item {
+            color: #303133 ;
+            font-weight: 500 ;
+            line-height: 40px ;
+            font-size: 15px;
+        }
+        .el-tabs__item:hover {
+            color: #409eff;
+        }
+        .el-col {
+            margin-bottom: 20px;
+        }
+        .tab {
+            width: 100%;
+        }
+        .box-card {
+            margin: 0 auto;
+            margin-top: 20px;
+            width: 600px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="video">
+    <el-container>
+        <el-header>
+            <div id = "title">
+
+                <el-menu
+                        default-active="1"
+                        class="el-menu-demo"
+                        mode="horizontal"
+                        background-color="#545c64"
+                        text-color="#fff"
+                        active-text-color="#ffd04b">
+                    <el-menu-item><img src="/img/sport-title3.png" width="30px" height="30px"> Sport Plant</el-menu-item>
+                    <el-menu-item index="1"><a href="/index">首页</a></el-menu-item>
+                    <el-menu-item index="2"><a href="/giftManager">奖品池</a></el-menu-item>
+                    <el-menu-item index="3">联系客服</el-menu-item>
+                    <el-submenu index="4" style="float: right;">
+                        <template slot="title"><i class="el-icon-user" style="color: white;"></i>尉一飞</template>
+                        <el-menu-item index="4-1">个人中心</el-menu-item>
+                        <el-menu-item index="4-2" @click="signOut">退出登录</el-menu-item>
+                    </el-submenu>
+                </el-menu>
+            </div>
+        </el-header>
+
+        <el-main>
+            <el-card class="box-card">
+                <div slot="header" class="clearfix">
+                    <span>视频上传</span>
+                </div>
+                <div id="formList">
+                    <el-form ref="form" :model="form" label-width="80px" :rules="rules">
+                        <el-form-item label="视频名称" prop="videoName">
+                            <el-input v-model="form.videoName" ></el-input>
+                        </el-form-item>
+                        <el-form-item label="视频类型" prop="videoType">
+                            <el-select v-model="form.videoType" placeholder="请选择">
+                                <el-option
+                                        v-for="(item, index) in form.options"
+                                        :key="index"
+                                        :label="item.value"
+                                        :value="item.label">
+                                </el-option>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="视频描述" prop="videoDesc">
+                            <el-input v-model="form.videoDesc"></el-input>
+                        </el-form-item>
+                        <el-form-item label="选择封面图片">
+                            <el-upload
+                                    class="upload-demo"
+                                    ref="photo"
+                                    action="/video/photo-upload"
+                                    :limit="1"
+                                    :file-list="form.photoFileList"
+                                    :on-success="photoSuccess"
+                                    :data="{id: form.videoId}"
+                                    :auto-upload="false"
+                                    >
+                                <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
+                                <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+                            </el-upload>
+                        </el-form-item>
+                        <el-form-item label="选择视频">
+                            <el-upload
+                                    class="upload-demo"
+                                    ref="upload"
+                                    action="/video/upload"
+                                    :limit="1"
+                                    :file-list="form.fileList"
+                                    :on-success="uploadSuccess"
+                                    :data="{videoName: form.videoName, videoDesc: form.videoDesc, price: form.price, videoType: form.videoType}"
+                                    :auto-upload="false">
+                                <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
+                                <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+                            </el-upload>
+                        </el-form-item>
+                        <el-form-item label="视频价格" prop="price">
+                            <el-input v-model.number="form.price" ></el-input>
+                        </el-form-item>
+                        <el-form-item>
+                            <el-button type="primary" @click="submitUpload('form')">立即上传</el-button>
+                            <el-button>取消</el-button>
+                        </el-form-item>
+                    </el-form>
+                </div>
+            </el-card>
+        </el-main>
+        <el-footer style="height: 60px;">@ by yyf</el-footer>
+    </el-container>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+    var vm = new Vue({
+        el: "#video",
+        data: {
+            form: {
+                videoId: "",
+                videoName: "",
+                videoDesc: "",
+                price: "",
+                videoType: "",
+                options: [
+
+                ],
+                fileList: [],
+                photoFileList:[]
+            },
+            rules: {
+                videoName: [
+                    { required: true, message: '视频名称不能为空'}
+                ],
+                videoDesc: [
+                    { required: true, message: '视频描述不能为空'}
+                ],
+                price: [
+                    { required: true, message: '请输入价格'},
+                    { type: 'number', message: '请正确输入价格'}
+                ],
+                videoType: [
+                    { required: true, message: '请选择视频类型'}
+                ]
+            }
+        },
+        methods: {
+            submitUpload(formName) {
+                var token = window.localStorage["token"];
+                if (!token) {
+                    window.location.href = "login";
+                    return ;
+                }
+                let that = this
+                this.$refs[formName].validate((valid) => {
+                    if (valid) {
+                        that.form.videoId = 23
+                        this.$refs.photo.submit();
+                    }
+                })
+            },
+            uploadSuccess(response, file, fileList) {
+                alert(this.form.videoDesc)
+                if (response.data > 0) {
+                    this.form.videoId = response.data
+                } else {
+                    this.$message('上传失败!!!');
+                    return ;
+                }
+            },
+            photoSuccess(response, file, fileList) {
+                if (response.data > 0) {
+                    this.$message('上传成功!!!');
+                } else {
+                    this.$message('上传失败!!!');
+                }
+            },
+            signOut() {
+                var token = window.localStorage["token"];
+                var formData = new FormData();
+                formData.append("token", token)
+                axios
+                    .post("/user/sign-out", formData)
+                    .then(function () {
+                        window.location.href="login"
+                    })
+            }
+        },
+        mounted () {
+            var _that = this
+            axios
+                .post("/enum/video_type")
+                .then(function (response) {
+                    _that.form.options = response.data.data
+                })
+        }
+    })
+</script>
+</body>
+</html>

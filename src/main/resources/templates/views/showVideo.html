@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>体育知识指导平台</title>
+
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+
+    <style>
+        html, body {
+            padding: 0px;
+            margin: 0px;
+        }
+        body {
+            background-color: rgba(250, 250, 250, 0.3);
+        }
+        .card {
+            margin: 0 auto;
+            width: 1200px;
+        }
+        .tab {
+            margin: 0 auto;
+            width: 100%;
+            min-height: 600px;
+        }
+        .video-class {
+            width: 80%;
+            margin: 0 auto;
+            margin-top: 20px;
+        }
+        .image {
+            height: 160px;
+            width: 100%;
+        }
+        .el-header {
+            padding: 0px;
+            width: 100%;
+            background-color: rgb(84, 92, 100);
+            position: fixed;
+            z-index: 111;
+        }
+        .el-main {
+            min-height: 800px;
+            max-width: 1200px;
+            margin: 80px auto;
+            padding: 20px 0;
+        }
+        .el-footer {
+            min-height: 150px;
+            padding: 20px;
+            background-color: rgb(84, 92, 100);
+            color: white;
+            text-align: center;
+        }
+        .el-menu {
+            max-width: 1180px;
+            margin: 0 auto;
+        }
+        .el-tabs__item {
+            color: #303133 ;
+            font-weight: 500 ;
+            line-height: 40px ;
+            font-size: 15px;
+        }
+        .el-tabs__item:hover {
+            color: #409eff;
+        }
+        .el-col {
+            margin-bottom: 20px;
+        }
+        .tab {
+            width: 100%;
+        }
+        .box-card {
+            margin: 0 auto;
+            margin-top: 20px;
+            width: 600px;
+        }
+
+        .video-class {
+            width: 80%;
+            margin: 0 auto;
+            margin-top: 20px;
+        }
+        .image {
+            height: 100px;
+            width: 100%;
+        }
+
+        .comment {
+            width: 100%;
+            margin: 0 auto;
+            margin-top: 20px;
+        }
+
+        .avatar {
+            margin-left: 40px;
+        }
+
+        .simple-button {
+            margin-left: 20px;
+            height: 70px;
+            width: 100px;
+        }
+
+        hr {
+            margin-top: 20px;
+            margin-bottom: 20px;
+            background-color: gainsboro;
+        }
+        .el-col {
+            border: 1px solid transparent;
+        }
+        .comment-title {
+            font-size: 16px;
+            padding-left: 20px;
+            margin-bottom: 20px;
+        }
+        .block {
+            float: right;
+        }
+        .comment-child-avatar {
+            padding-top: 15px;
+        }
+        .comment-child-before-name {
+            color: #6d757a;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .comment-child-after-name {
+            color: #1890ff;
+            font-size: 14px;
+        }
+        .comment-icon {
+            cursor: pointer;
+        }
+        .el-dropdown-link {
+            cursor: pointer;
+            color: #409EFF;
+        }
+        .el-row {
+            padding: 0;
+        }
+        .el-card__body {
+            padding-top: 0px;
+        }
+
+    </style>
+</head>
+<body>
+
+<div id="video">
+    <el-container>
+        <el-header>
+            <div id = "title">
+
+                <el-menu
+                        default-active="1"
+                        class="el-menu-demo"
+                        mode="horizontal"
+                        background-color="#545c64"
+                        text-color="#fff"
+                        active-text-color="#ffd04b">
+                    <el-menu-item><img src="/img/sport-title3.png" width="30px" height="30px"> Sport Plant</el-menu-item>
+                    <el-menu-item index="1"><a href="/index">首页</a></el-menu-item>
+                    <el-menu-item index="2"><a href="/giftManager">奖品池</a></el-menu-item>
+                    <el-menu-item index="3">联系客服</el-menu-item>
+                    <el-submenu index="4" style="float: right;">
+                        <template slot="title"><i class="el-icon-user" style="color: white;"></i>尉一飞</template>
+                        <el-menu-item index="4-1">个人中心</el-menu-item>
+                        <el-menu-item index="4-2" @click="signOut">退出登录</el-menu-item>
+                    </el-submenu>
+                </el-menu>
+            </div>
+        </el-header>
+
+        <el-main>
+            <div id="vm">
+                <video style="width: 1200px; height: 600px; margin: 0 auto ;" :src="videoUrl" controls="controls">
+                </video>
+            </div>
+            <div id="comment" class="comment">
+                <el-card style="padding: 10px;">
+                    <el-row class="comment-title">
+                        <p>1024 评论</p>
+                        <div class="block">
+                            <el-pagination
+                                    layout="prev, pager, next"
+                                    :total="1000">
+                            </el-pagination>
+                        </div>
+                    </el-row>
+                    <el-divider></el-divider>
+                    <el-row >
+                        <el-col :span="3">
+                            <el-avatar  :size="50" class="avatar"></el-avatar>
+                        </el-col>
+                        <el-col :span="17">
+                            <el-input type="textarea" :rows="3" v-model="comment"></el-input>
+                        </el-col>
+                        <el-col :span="4">
+                            <el-button type="primary" class="simple-button" @click="submit(0, 0)">发表</el-button>
+                        </el-col>
+                    </el-row>
+                    <el-divider></el-divider>
+                    <div :id="'comment' + index" class="comment-content" v-for="(item, index) in commentList" :key="index">
+                        <el-row >
+                            <el-col :span="3">
+                                <el-avatar :src="item.user.photo" :size="50" class="avatar"></el-avatar>
+                            </el-col>
+                            <el-col :span="21">
+                                <div><p style="font-size:14px; color:gray">{{item.name}}</p></div>
+                                <div>{{item.comment}}</div>
+                                <div >
+                                    <span style="font-size:13px; color:gray">{{item.createTime}}</span>
+                                    <el-button type="text"  @click="replayCheck(index, item.id, item.user.id)" >回复</el-button>
+                                </div>
+                                <el-row v-for="(childComment, cindex) in item.childComments" :key="cindex">
+                                    <el-col :span="3" class="el-col" style="padding-left: 20px;">
+                                        <el-avatar :src="childComment.replayUser.photo" :size="30" class="avatar"></el-avatar>
+                                    </el-col>
+                                    <el-col :span="21">
+                                        <div>
+                                            <span class="comment-child-before-name" >{{childComment.user.username}}</span>
+                                            <span>回复</span>
+                                            <span class="comment-child-after-name">@{{childComment.replayUser.username}}</span>
+                                            <span style="font-size: 14px;">{{childComment.comment}}</span>
+                                        </div>
+                                    </el-col>
+
+                                </el-row>
+
+                            </el-col>
+
+
+                            <el-col :span="22" class="el-col"></el-col>
+                            <el-col :span="2" style="margin: 0">
+                                <div >
+                                    <el-dropdown>
+                                  <span class="el-dropdown-link" >
+                                    <i class="el-icon-more" ></i>
+                                  </span>
+                                        <el-dropdown-menu slot="dropdown">
+                                            <el-dropdown-item @click.native="deleteComment(item.id)">删除</el-dropdown-item>
+                                        </el-dropdown-menu>
+                                    </el-dropdown>
+                                </div>
+                            </el-col>
+
+                            <div v-if="commentFlag[index]">
+
+                                <el-col :span="3" class="el-col">
+
+                                </el-col>
+                                <el-col :span="17">
+                                    <el-row >
+                                        <el-col :span="4" class="comment-child-avatar">
+                                            <el-avatar :size="40" class="avatar"></el-avatar>
+                                        </el-col>
+                                        <el-col :span="20">
+                                            <el-input type="textarea" :rows="3" v-model="replay"></el-input>
+                                        </el-col>
+                                    </el-row>
+                                </el-col>
+                                <el-col :span="4">
+                                    <el-button type="primary" class="simple-button" @click="submit(parentId, replayUserId)">发表</el-button>
+                                </el-col>
+                            </div>
+                        </el-row>
+                        <el-divider></el-divider>
+                    </div>
+
+                </el-card>
+            </div>
+
+        </el-main>
+        <el-footer style="height: 60px;">@ by yyf</el-footer>
+    </el-container>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<!-- 引入组件库 -->
+<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script>
+    var vm = new Vue({
+        el: "#video",
+        data: {
+            replayUser: "",
+            commentFlag:[],
+            videoUrl: "",
+            videoId: "",
+            comment:"",
+            replay:"",
+            commentList:[]
+        },
+        methods: {
+            replayCheck(index, parentId, replayUserId) {
+                this.parentId = parentId
+                this.replayUserId = replayUserId
+                this.$set(this.commentFlag, index, !this.commentFlag[index])
+            },
+            submit(parentId, replayUserId) {
+                let token = window.localStorage["token"]
+                if (!token) {
+                    window.location.href = "login"
+                }
+                axios.defaults.headers.common["Token"] = token
+                var vo = {
+                    videoId: this.videoId,
+                    comment: this.comment,
+                    replayUserId: replayUserId,
+                    parentId: parentId
+                }
+                var _that = this
+                axios
+                    .post("/comment/add", vo)
+                    .then(function (response) {
+                        _that.$message({
+                            message: '发表评论成功',
+                            type: 'success'
+                        });
+                        _that.$options.methods.getVideoInfo(_that.videoId, _that);
+                    })
+            },
+            deleteComment(commentId) {
+                let _that = this
+                let formData = new FormData();
+                formData.append("commentId", commentId)
+                axios
+                    .post("/comment/deleteComment", formData)
+                    .then(function (response) {
+                        if (response.data.data === true) {
+                            _that.$message({
+                                message: '删除评论评论成功',
+                                type: 'success'
+                            });
+                            _that.$options.methods.getVideoInfo(_that.videoId, _that);
+                        }
+                    })
+            },
+            getVideoInfo: function(videoId, _self) {
+                let formData = new FormData();
+                formData.append("videoId", videoId)
+                axios.post("/comment/query", formData)
+                    .then(function (response) {
+                        _self.commentList = response.data.data
+                    })
+            },
+
+        },
+        mounted () {
+            //获取videoId
+            var _that = this
+            var tmp = window.location.search;
+            if (tmp) {
+                var videoId = tmp.substring(1).split("=")[1];
+                _that.videoId = videoId
+            }
+
+            //查询videoId对应的视频
+            let formData = new FormData();
+            formData.append("videoId", videoId)
+            axios.post("/video/getVideo", formData)
+                .then(function (response) {
+                    if (response.data.data ==="视频信息已过期") {
+                        alert("视频信息已过期")
+                    } else {
+                        _that.videoUrl = response.data.data.address
+                    }
+                })
+
+            //获取视频对应的评论信息
+            axios.post("/comment/query", formData)
+                .then(function (response) {
+                    _that.commentList = response.data.data
+                    for (let i = 0; i < _that.commentList.length; i++) {
+                        _that.commentFlag.push(false);
+                    }
+                })
+        }
+    })
+</script>
+</body>
+</html>

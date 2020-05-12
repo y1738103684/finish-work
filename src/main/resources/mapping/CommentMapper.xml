@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.nuc.finish.dao.CommentMapper" >
+
+    <resultMap id="commentMap" type="com.nuc.finish.pojo.Comment">
+        <id property="id" column="id"></id>
+        <result property="parentId" column="parent_id"></result>
+        <result property="comment" column="comment"></result>
+        <result property="createTime" column="create_time"></result>
+        <result property="updateTime" column="update_time"></result>
+        <result property="videoId" column="video_id"></result>
+        <result property="commentStatus" column="comment_status"></result>
+        <association property="user" javaType="com.nuc.finish.pojo.User" select="com.nuc.finish.dao.UserMapper.selectByUserId" column="user_id">
+        </association>
+        <association property="replayUser" javaType="com.nuc.finish.pojo.User" select="com.nuc.finish.dao.UserMapper.selectByUserId" column="replay_user_id">
+        </association>
+        <collection property="childComments" ofType="com.nuc.finish.pojo.Comment" select="listCommentByParentId" column="id">
+        </collection>
+    </resultMap>
+
+    <resultMap id="oneToOneCommentMap" type="com.nuc.finish.pojo.Comment">
+        <id property="id" column="id"></id>
+        <result property="parentId" column="parent_id"></result>
+        <result property="comment" column="comment"></result>
+        <result property="createTime" column="create_time"></result>
+        <result property="updateTime" column="update_time"></result>
+        <result property="videoId" column="video_id"></result>
+        <result property="commentStatus" column="comment_status"></result>
+        <association property="user" javaType="com.nuc.finish.pojo.User" select="com.nuc.finish.dao.UserMapper.selectByUserId" column="user_id">
+        </association>
+        <association property="replayUser" javaType="com.nuc.finish.pojo.User" select="com.nuc.finish.dao.UserMapper.selectByUserId" column="replay_user_id">
+        </association>
+    </resultMap>
+
+    <insert id="insertComment">
+        insert into comment_info(video_id, comment,user_id, replay_user_id, parent_id, update_time, create_time)
+        values (#{vo.videoId}, #{vo.comment}, #{vo.userId}, #{vo.replayUserId},  #{vo.parentId}, #{vo.updateTime}, #{vo.createTime})
+    </insert>
+
+    <select id="listCommentsByVideoId" resultMap="commentMap">
+        select * from comment_info where video_id = #{videoId} and parent_id = 0 and comment_status = 0
+    </select>
+
+    <select id="listCommentByParentId" resultMap="oneToOneCommentMap">
+        select * from comment_info where parent_id = #{parentId} and comment_status = 0 order by create_time desc
+    </select>
+
+    <update id="updateCommentStatus">
+        update comment_info set comment_status = 1 where id = #{id}
+    </update>
+</mapper>
