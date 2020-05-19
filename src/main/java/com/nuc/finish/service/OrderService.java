@@ -17,7 +17,7 @@ import java.util.List;
 public interface OrderService {
     Boolean isExistOrder(Integer videoId, Integer userId);
 
-    Boolean buyVideo(User user, Integer videoId);
+    Boolean buyVideo(User user, Integer videoId, String token);
 
     PageInfo<OrderModel> getSelfVideo(User user, Pagination pagination);
 }

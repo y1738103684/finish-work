@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 /**
@@ -34,12 +35,13 @@ public class OrderController extends BaseController{
     }
 
     @RequestMapping("order/buyVideo")
-    public Response buyVideo(@RequestParam("videoId") Integer videoId) {
+    public Response buyVideo(@RequestParam("videoId") Integer videoId, HttpServletRequest request) {
         User loginUser = getLoginUser();
         if (loginUser == null) {
             return Response.create(CommonResponseEnum.USER_LOGIN_NOT.getErrCode());
         }
-        Boolean bool = orderService.buyVideo(loginUser, videoId);
+        String token = request.getHeader("Token");
+        Boolean bool = orderService.buyVideo(loginUser, videoId, token);
         return Response.create(bool);
     }
 

@@ -144,7 +144,14 @@
         .el-card__body {
             padding-top: 0px;
         }
-
+        a {
+            text-decoration: none;
+            color: white;
+        }
+        .el-menu {
+            max-width: 1180px;
+            margin: 0 auto;
+        }
     </style>
 </head>
 <body>
@@ -163,13 +170,24 @@
                         active-text-color="#ffd04b">
                     <el-menu-item><img src="/img/sport-title3.png" width="30px" height="30px"> Sport Plant</el-menu-item>
                     <el-menu-item index="1"><a href="/index">首页</a></el-menu-item>
-                    <el-menu-item index="2"><a href="/giftManager">奖品池</a></el-menu-item>
-                    <el-menu-item index="3">联系客服</el-menu-item>
-                    <el-submenu index="4" style="float: right;">
-                        <template slot="title"><i class="el-icon-user" style="color: white;"></i>尉一飞</template>
-                        <el-menu-item index="4-1">个人中心</el-menu-item>
-                        <el-menu-item index="4-2" @click="signOut">退出登录</el-menu-item>
+                    <el-menu-item index="2"><a href="/giftShow">奖品池</a></el-menu-item>
+                    <el-menu-item index="3"><a href="/customerService">联系客服</a></el-menu-item>
+                    <el-submenu index="4" style="float: right;" v-if="user.username">
+                        <template slot="title"><i class="el-icon-user" style="color: white;"></i>{{user.username}}
+                            <el-image v-if="user.isVip === true"
+                                      style="width: 30px; height: 30px"
+                                      src="/img/vip1.png"
+                                      fit="fill">
+                            </el-image>
+                        </template>
+                        <el-menu-item index="4-1"><a href="/selfInfo">个人中心</a></el-menu-item>
+                        <el-menu-item index="4-2" v-if="user.username && user.id===1"><a href="/giftManager">奖品管理</a></el-menu-item>
+                        <el-menu-item index="4-3" v-if="user.isVip === false" @click="dialogVisible1 = true">VIP办理</el-menu-item>
+                        <el-menu-item index="4-4"><a href="/uploadVideo">上传视频</a></el-menu-item>
+                        <el-menu-item index="4-5" @click="signOut">退出登录</el-menu-item>
+
                     </el-submenu>
+                    <el-menu-item index="4" style="float: right" v-if="!user.username"><i class="el-icon-user" style="color: white;"></i><a style="text-decoration: none;color: white" href="login">登录</a></el-menu-item>
                 </el-menu>
             </div>
         </el-header>
@@ -193,16 +211,20 @@
                     <el-divider></el-divider>
                     <el-row >
                         <el-col :span="3">
-                            <el-avatar  :size="50" class="avatar"></el-avatar>
+                            <el-avatar  :size="50" class="avatar" :src="user.photo"></el-avatar>
                         </el-col>
                         <el-col :span="17">
                             <el-input type="textarea" :rows="3" v-model="comment"></el-input>
                         </el-col>
                         <el-col :span="4">
-                            <el-button type="primary" class="simple-button" @click="submit(0, 0)">发表</el-button>
+                            <el-button type="primary" class="simple-button" @click="submit1(0, 0)">发表</el-button>
                         </el-col>
                     </el-row>
                     <el-divider></el-divider>
+                    <div style="min-height: 200px;" v-if="commentList.length === 0">
+                        <p style="margin-left: 45%;line-height: 200px;color: #E6A23C;font-size: 20px;">评论区空空如也</p>
+                        <el-divider></el-divider>
+                    </div>
                     <div :id="'comment' + index" class="comment-content" v-for="(item, index) in commentList" :key="index">
                         <el-row >
                             <el-col :span="3">
@@ -255,7 +277,7 @@
                                 <el-col :span="17">
                                     <el-row >
                                         <el-col :span="4" class="comment-child-avatar">
-                                            <el-avatar :size="40" class="avatar"></el-avatar>
+                                            <el-avatar :size="40" class="avatar" :src="user.photo"></el-avatar>
                                         </el-col>
                                         <el-col :span="20">
                                             <el-input type="textarea" :rows="3" v-model="replay"></el-input>
@@ -272,6 +294,17 @@
 
                 </el-card>
             </div>
+
+            <el-dialog
+                    title="VIP办理"
+                    :visible.sync="dialogVisible1"
+                    width="30%">
+                <span>您确定要开通VIP吗?</span>
+                <span slot="footer" class="dialog-footer">
+                <el-button @click="dialogVisible1 = false">取 消</el-button>
+                <el-button type="primary" @click="getVip">确 定</el-button>
+                </span>
+            </el-dialog>
 
         </el-main>
         <el-footer style="height: 60px;">@ by yyf</el-footer>
@@ -294,15 +327,67 @@
             videoId: "",
             comment:"",
             replay:"",
-            commentList:[]
+            commentList:[],
+            user:{},
+            dialogVisible1: false
         },
         methods: {
+            signOut() {
+                var token = window.localStorage["token"];
+                var formData = new FormData();
+                formData.append("token", token)
+                axios
+                    .post("/user/sign-out", formData)
+                    .then(function () {
+                        window.location.href="login"
+                    })
+            },
             replayCheck(index, parentId, replayUserId) {
                 this.parentId = parentId
                 this.replayUserId = replayUserId
                 this.$set(this.commentFlag, index, !this.commentFlag[index])
             },
             submit(parentId, replayUserId) {
+                let token = window.localStorage["token"]
+                if (!token) {
+                    window.location.href = "login"
+                }
+                axios.defaults.headers.common["Token"] = token
+                var vo = {
+                    videoId: this.videoId,
+                    comment: this.replay,
+                    replayUserId: replayUserId,
+                    parentId: parentId
+                }
+                var _that = this
+                axios
+                    .post("/comment/add", vo)
+                    .then(function (response) {
+                        _that.$message({
+                            message: '发表评论成功',
+                            type: 'success'
+                        });
+                        _that.replay=""
+                        _that.$options.methods.getVideoInfo(_that.videoId, _that);
+                    })
+            },
+            deleteComment(commentId) {
+                let _that = this
+                let formData = new FormData();
+                formData.append("commentId", commentId)
+                axios
+                    .post("/comment/deleteComment", formData)
+                    .then(function (response) {
+                        if (response.data.data === true) {
+                            _that.$message({
+                                message: '删除评论成功',
+                                type: 'success'
+                            });
+                            _that.$options.methods.getVideoInfo(_that.videoId, _that);
+                        }
+                    })
+            },
+            submit1(parentId, replayUserId) {
                 let token = window.localStorage["token"]
                 if (!token) {
                     window.location.href = "login"
@@ -322,23 +407,8 @@
                             message: '发表评论成功',
                             type: 'success'
                         });
+                        _that.comment=""
                         _that.$options.methods.getVideoInfo(_that.videoId, _that);
-                    })
-            },
-            deleteComment(commentId) {
-                let _that = this
-                let formData = new FormData();
-                formData.append("commentId", commentId)
-                axios
-                    .post("/comment/deleteComment", formData)
-                    .then(function (response) {
-                        if (response.data.data === true) {
-                            _that.$message({
-                                message: '删除评论评论成功',
-                                type: 'success'
-                            });
-                            _that.$options.methods.getVideoInfo(_that.videoId, _that);
-                        }
                     })
             },
             getVideoInfo: function(videoId, _self) {
@@ -349,7 +419,23 @@
                         _self.commentList = response.data.data
                     })
             },
-
+            getVip() {
+                let data = new FormData();
+                let that = this
+                data.append("userId", this.user.id)
+                axios
+                    .post("user/getVip", data)
+                    .then(function (response) {
+                        if (response.data.data > 0) {
+                            that.$message({
+                                message: '恭喜你，成为尊贵的VIP',
+                                type: 'success'
+                            });
+                            that.user.isVip = true
+                        }
+                        that.dialogVisible1 = false
+                    })
+            },
         },
         mounted () {
             //获取videoId
@@ -359,6 +445,16 @@
                 var videoId = tmp.substring(1).split("=")[1];
                 _that.videoId = videoId
             }
+            let token = window.localStorage["token"];
+            axios.defaults.headers.common["Token"] = token
+            axios
+                .post("/user/token")
+                .then(function (response) {
+                    if (response.data.data === false) {
+                        return;
+                    }
+                    _that.user = response.data.data
+                })
 
             //查询videoId对应的视频
             let formData = new FormData();

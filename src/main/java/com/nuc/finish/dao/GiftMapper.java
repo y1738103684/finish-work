@@ -18,4 +18,6 @@ public interface GiftMapper {
     List<Gift> listGifts();
 
     int insertGift(@Param("vo") GiftVO vo);
+
+    int deleteGiftById(@Param("id") Integer id);
 }

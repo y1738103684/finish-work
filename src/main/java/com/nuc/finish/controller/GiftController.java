@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.concurrent.ConcurrentHashMap;
+
 /**
  * @author 尉一飞
  * @Description
@@ -48,5 +50,12 @@ public class GiftController extends BaseController{
         }
         LabelValue<Integer, String> labelValue = giftService.exChangeGift(token, vo, loginUser);
         return Response.create(labelValue);
+    }
+
+
+    @RequestMapping("/gift/delete")
+    public Response giftUpload(@RequestParam("giftId") Integer giftId) {
+        int i = giftService.deleteGift(giftId);
+        return Response.create(i);
     }
 }

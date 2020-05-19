@@ -19,4 +19,6 @@ public interface GiftService {
     boolean uploadGift(MultipartFile file, GiftVO vo);
 
     LabelValue<Integer, String> exChangeGift(String token, GiftVO vo, User user);
+
+    int deleteGift(Integer id);
 }

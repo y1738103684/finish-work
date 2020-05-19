@@ -136,7 +136,7 @@
         },
         methods: {
             submit: function (formName) {
-
+                let _that = this
                 this.$refs[formName].validate((valid) => {
                     if (valid) {
                         axios
@@ -146,11 +146,11 @@
                                     window.localStorage["token"] = response.data.data;
                                     window.location.href="index";
                                 } else {
-                                    alert("登录失败");
+                                    _that.$message.error('登录用户名密码不正确');
                                 }
                             })
                             .catch(function (error) { // 请求失败处理
-                                alert("登录失败")
+                                _that.$message.error('登录用户名密码不正确');
                             });
                     } else {
                         console.log('error submit!!');

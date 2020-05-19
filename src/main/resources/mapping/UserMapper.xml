@@ -15,6 +15,10 @@
         select * from user_info where id = #{id}
     </select>
 
+    <update id="updateVip">
+        update user_info set is_vip = 1 where id = #{id}
+    </update>
+
     <insert id="insertUser">
         insert into user_info(tel, password) values(#{vo.tel}, #{vo.password})
     </insert>
@@ -31,4 +35,9 @@
     <update id="updatePoints">
         update user_info set vip_points = #{points} where id = #{id}
     </update>
+
+    <select id="selectByTel" parameterType="com.nuc.finish.pojo.User" resultType="com.nuc.finish.pojo.User">
+        select * from user_info where tel = #{tel}
+    </select>
+
 </mapper>

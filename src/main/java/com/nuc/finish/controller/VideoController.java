@@ -53,25 +53,21 @@ public class VideoController extends BaseController{
     }
 
     @RequestMapping("/video/upload")
-    public Response uploadVideo(VideoVO vo, @RequestParam("file")MultipartFile file) throws CommonException {
+    public Response uploadVideo(@RequestParam("file")MultipartFile file) throws CommonException {
         String address = FileUploadUtil.uploadFile(file);
         if (address == null) {
             throw new CommonException(CommonResponseEnum.FILE_UPLOAD_FAIL);
         }
-        vo.setAddress(address);
-        int i = videoService.uploadVideo(vo);
-        return Response.create(i);
+        return Response.create(address);
     }
 
     @RequestMapping("/video/photo-upload")
-    public Response photoUploadVideo(VideoVO vo, @RequestParam("file")MultipartFile file) throws CommonException {
+    public Response photoUploadVideo(@RequestParam("file")MultipartFile file) throws CommonException {
         String photo = FileUploadUtil.uploadFile(file);
         if (photo == null) {
             throw new CommonException(CommonResponseEnum.FILE_UPLOAD_FAIL);
         }
-        vo.setPhoto(photo);
-        int i = videoService.uploadPhoto(vo);
-        return Response.create(i);
+        return Response.create(photo);
     }
 
     @RequestMapping("/video/getVideo")
@@ -88,6 +84,12 @@ public class VideoController extends BaseController{
     public Response recommend() {
         List<Video> recommend = videoService.recommend();
         return Response.create(recommend);
+    }
+
+    @RequestMapping("/video/addVideo")
+    public Response addVideo(@RequestBody VideoVO vo) {
+        int i = videoService.uploadVideo(vo);
+        return Response.create(i);
     }
 
 

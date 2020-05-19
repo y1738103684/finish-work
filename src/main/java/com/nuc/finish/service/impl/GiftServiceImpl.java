@@ -8,11 +8,13 @@ import com.nuc.finish.dao.GiftMapper;
 import com.nuc.finish.dao.UserMapper;
 import com.nuc.finish.pojo.Gift;
 import com.nuc.finish.pojo.User;
+import com.nuc.finish.service.CacheService;
 import com.nuc.finish.service.GiftRecordService;
 import com.nuc.finish.service.GiftService;
 import com.nuc.finish.util.FileUploadUtil;
 import com.nuc.finish.vo.GiftRecordVO;
 import com.nuc.finish.vo.GiftVO;
+import org.checkerframework.checker.units.qual.A;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
@@ -37,6 +39,9 @@ public class GiftServiceImpl implements GiftService {
 
     @Autowired
     private GiftRecordService giftRecordService;
+
+    @Autowired
+    private CacheService cacheService;
 
     @Autowired
     private RedisTemplate redisTemplate;
@@ -81,6 +86,11 @@ public class GiftServiceImpl implements GiftService {
         } else {
             return new LabelValue<>(1, "您还不是VIP");
         }
+    }
+
+    @Override
+    public int deleteGift(Integer id) {
+        return giftMapper.deleteGiftById(id);
     }
 
     private GiftRecordVO createGiftRecord(Integer giftId, Integer userId) {

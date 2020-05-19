@@ -18,9 +18,13 @@
     </update>
 
     <select id="listByCreateTime" resultType="com.nuc.finish.pojo.Chat">
-        select * from chat_info where (user_from=#{query.userFrom}
-        and user_to = #{query.userTo})
-        or (user_from=#{query.userTo} and user_to = #{query.userFrom})
+        select * from
+        (select * from chat_info where user_from=#{query.userFrom} and user_to = #{query.userTo}
         and create_time > #{date}
+        union
+        select * from chat_info where user_from=#{query.userTo} and user_to = #{query.userFrom}
+        and create_time > #{date}) as tmp
+        where content_status=1
+        order by create_time
     </select>
 </mapper>

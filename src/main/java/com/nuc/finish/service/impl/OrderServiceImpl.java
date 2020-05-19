@@ -1,5 +1,6 @@
 package com.nuc.finish.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.nuc.finish.common.Pagination;
@@ -16,6 +17,7 @@ import com.nuc.finish.service.VideoService;
 import com.nuc.finish.util.DateUtil;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -45,6 +47,9 @@ public class OrderServiceImpl implements OrderService{
     @Autowired
     private VideoService videoService;
 
+    @Autowired
+    private RedisTemplate redisTemplate;
+
     @Override
     public Boolean isExistOrder(Integer videoId, Integer userId) {
         Order order = orderMapper.selectByVideoIdAndUserId(videoId, userId);
@@ -52,11 +57,24 @@ public class OrderServiceImpl implements OrderService{
     }
 
     @Override
-    public Boolean buyVideo(User user, Integer videoId) {
+    public Boolean buyVideo(User user, Integer videoId, String token) {
         Order order = new Order();
         Video video = videoMapper.selectVideoById(videoId);
         fullOrder(order, user, video);
         int i = orderMapper.insertOrder(order);
+        Boolean isVip = user.getIsVip();
+        if (isVip) {
+            Integer price = video.getPrice();
+            int points = user.getVipPoints() + price;
+            //添加积分
+            int res = userMapper.updatePoints(points, user.getId());
+            if (res > 0) {
+                JSONObject jsonObject = (JSONObject)redisTemplate.opsForValue().get(token);
+                User redisUser = jsonObject.toJavaObject(User.class);
+                redisUser.setVipPoints(points);
+                redisTemplate.opsForValue().set(token, redisUser);
+            }
+        }
         return i > 0 ? true : false;
     }
 

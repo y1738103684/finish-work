@@ -17,7 +17,7 @@ public class DateUtil {
     public static Date getBeforeDay(Date date, int day) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
-        calendar.add(Calendar.HOUR_OF_DAY, -day);
+        calendar.add(Calendar.DAY_OF_YEAR, -day);
         Date time = calendar.getTime();
         return time;
     }

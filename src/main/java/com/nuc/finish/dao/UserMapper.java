@@ -24,9 +24,13 @@ public interface UserMapper {
 
     int insertUser(@Param("vo") LoginVO vo);
 
+    int updateVip(@Param("id") Integer id);
+
     int updatePwd(@Param("vo")LoginVO vo);
 
     int updateUser(@Param("vo") LoginVO vo);
 
     int updatePoints(@Param("points") Integer points, @Param("id") Integer userId);
+
+    User selectByTel(@Param("tel") Long tel);
 }

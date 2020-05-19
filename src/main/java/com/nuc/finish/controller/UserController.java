@@ -6,6 +6,9 @@ import com.nuc.finish.response.CommonResponseEnum;
 import com.nuc.finish.response.Response;
 import com.nuc.finish.service.UserService;
 import com.nuc.finish.vo.LoginVO;
+import org.apache.rocketmq.client.exception.MQBrokerException;
+import org.apache.rocketmq.client.exception.MQClientException;
+import org.apache.rocketmq.remoting.exception.RemotingException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -58,7 +61,7 @@ public class UserController extends BaseController {
 
     @RequestMapping("/user/identify")
     @ResponseBody
-    public Response identify(@RequestBody LoginVO vo) throws CommonException {
+    public Response identify(@RequestBody LoginVO vo) throws CommonException, InterruptedException, RemotingException, MQClientException, MQBrokerException {
         String register = userService.getIdentifyCode(vo);
         return Response.create(register);
     }
@@ -96,6 +99,22 @@ public class UserController extends BaseController {
         return loginUser == null ? Response.create(false) : Response.create(loginUser);
 
 
+    }
+
+    @RequestMapping("/user/getVip")
+    @ResponseBody
+    public Response getVip(@RequestParam("userId") Integer userId, HttpServletRequest request) throws CommonException {
+        String token = request.getHeader("Token");
+        User loginUser = getLoginUser();
+        if (loginUser == null) {
+            throw new CommonException(CommonResponseEnum.USER_LOGIN_NOT);
+        }
+        int vip = userService.getVip(userId);
+        if (vip > 0) {
+            loginUser.setIsVip(true);
+        }
+        redisTemplate.opsForValue().set(token, loginUser);
+        return Response.create(vip);
     }
 
 }

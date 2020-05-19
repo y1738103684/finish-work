@@ -17,8 +17,8 @@
     </select>
 
     <insert id="insertVideo" parameterType="com.nuc.finish.vo.VideoVO" keyProperty="vo.id" useGeneratedKeys="true">
-        insert into video_info(video_type, video_name, video_desc, user_id, play_number, address, last_play_time, price, update_time, create_time)
-        values (#{vo.videoType}, #{vo.videoName}, #{vo.videoDesc}, #{vo.userId}, 0, #{vo.address}, now(), #{vo.price}, now(), now())
+        insert into video_info(video_type, video_name, video_desc, user_id, play_number, address, last_play_time, price, update_time, create_time, photo)
+        values (#{vo.videoType}, #{vo.videoName}, #{vo.videoDesc}, #{vo.userId}, 0, #{vo.address}, now(), #{vo.price}, now(), now(), #{vo.photo})
     </insert>
 
     <select id="listByLimit" resultType="com.nuc.finish.pojo.Video">

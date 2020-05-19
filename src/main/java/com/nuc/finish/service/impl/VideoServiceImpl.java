@@ -1,5 +1,6 @@
 package com.nuc.finish.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.nuc.finish.common.Pagination;
@@ -8,18 +9,21 @@ import com.nuc.finish.dao.VideoMapper;
 import com.nuc.finish.model.VideoModel;
 import com.nuc.finish.pojo.User;
 import com.nuc.finish.pojo.Video;
+import com.nuc.finish.service.CacheService;
 import com.nuc.finish.service.VideoService;
 import com.nuc.finish.util.DateUtil;
 import com.nuc.finish.vo.VideoVO;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author 尉一飞
@@ -36,6 +40,12 @@ public class VideoServiceImpl implements VideoService {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private CacheService cacheService;
+
+    @Autowired
+    private RedisTemplate redisTemplate;
 
     @Override
     public PageInfo<VideoModel> showVideo( Pagination pagination,  Integer type) {
@@ -60,7 +70,19 @@ public class VideoServiceImpl implements VideoService {
 
     @Override
     public Video getVideoById(Integer id) {
-        return videoMapper.selectVideoById(id);
+        Video video = (Video)cacheService.getFromCache(id.toString());
+        if (video == null) {
+            Object o = redisTemplate.opsForValue().get(id.toString());
+            if (o == null) {
+                 video = videoMapper.selectVideoById(id);
+                 redisTemplate.opsForValue().set(id.toString(), video, 120, TimeUnit.SECONDS);
+                 cacheService.setCache(id.toString(), video);
+             } else {
+                JSONObject jsonObject = (JSONObject) o;
+                video = jsonObject.toJavaObject(Video.class);
+            }
+        }
+        return video;
     }
 
     @Override

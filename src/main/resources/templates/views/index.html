@@ -73,6 +73,7 @@
         }
         a {
             text-decoration: none;
+            color: white;
         }
 
     </style>
@@ -93,36 +94,38 @@
                         active-text-color="#ffd04b">
                     <el-menu-item><img src="/img/sport-title3.png" width="30px" height="30px"> Sport Plant</el-menu-item>
                     <el-menu-item index="1"><a href="/index">首页</a></el-menu-item>
-                    <el-menu-item index="2"><a href="/giftManager">奖品池</a></el-menu-item>
-                    <el-menu-item index="3">联系客服</el-menu-item>
-                    <el-submenu index="4" style="float: right;">
-                        <template slot="title"><i class="el-icon-user" style="color: white;"></i>尉一飞</template>
-                        <el-menu-item index="4-1">个人中心</el-menu-item>
-                        <el-menu-item index="4-2" @click="signOut">退出登录</el-menu-item>
+                    <el-menu-item index="2"><a href="/giftShow">奖品池</a></el-menu-item>
+                    <el-menu-item index="3"><a href="/customerService">联系客服</a></el-menu-item>
+                    <el-submenu index="4" style="float: right;" v-if="user.username">
+                            <template slot="title"><i class="el-icon-user" style="color: white;"></i>{{user.username}}
+                                <el-image v-if="user.isVip === true"
+                                          style="width: 30px; height: 30px"
+                                          src="/img/vip1.png"
+                                          fit="fill">
+                                </el-image>
+                            </template>
+                            <el-menu-item index="4-1"><a href="/selfInfo">个人中心</a></el-menu-item>
+                            <el-menu-item index="4-2" v-if="user.username && user.id===1"><a href="/giftManager">奖品管理</a></el-menu-item>
+                            <el-menu-item index="4-3" v-if="user.isVip === false" @click="dialogVisible1 = true">VIP办理</el-menu-item>
+                            <el-menu-item index="4-4"><a href="/uploadVideo">上传视频</a></el-menu-item>
+                            <el-menu-item index="4-5" @click="signOut">退出登录</el-menu-item>
+
                     </el-submenu>
+                    <el-menu-item index="4" style="float: right" v-if="!user.username"><i class="el-icon-user" style="color: white;"></i><a style="text-decoration: none;color: white" href="login">登录</a>
+
+                    </el-menu-item>
                 </el-menu>
             </div>
         </el-header>
 
         <el-main>
-            <el-carousel :interval="4000" indicator-position="outside" height="500px" >
-                <el-carousel-item >
-                    <img src="/img/gaoqing6.jpg" width="100%" height="100%">
-                </el-carousel-item>
-                <el-carousel-item >
-                    <img src="/img/gaoqing1.jpg"  width="100%" height="100%">
-                </el-carousel-item>
-                <el-carousel-item >
-                    <img src="/img/gaoqing3.jpg"  width="100%" height="100%">
-                </el-carousel-item>
-                <el-carousel-item >
-                    <img src="/img/gaoqing2.jpg"  width="100%" height="100%">
-                </el-carousel-item>
-                <el-carousel-item >
-                    <img src="/img/gaoqing4.jpg"  width="100%" height="100%">
-                </el-carousel-item>
-                <el-carousel-item >
-                    <img src="/img/gaoqing5.jpg"  width="100%" height="100%">
+            <el-carousel :interval="4000" indicator-position="outside" height="500px"
+                         v-loading="loading"
+                         element-loading-text="拼命加载中"
+                         element-loading-spinner="el-icon-loading"
+                         element-loading-background="rgba(0, 0, 0, 0.8)">
+                <el-carousel-item v-for="(item, index) in mainVideoList" :key="index">
+                    <img :src="item.photo" width="100%" height="100%" @click="getVideoPage(item.id, item.price)">
                 </el-carousel-item>
             </el-carousel>
 
@@ -137,8 +140,11 @@
                             <el-row :gutter="20">
                                 <el-col :span="6" v-for="(item, index) in pagination.list" :key="index">
                                     <el-card :body-style="{ padding: '10px' }">
-                                        <img :src="item.photo" class="image" @click="getVideoPage(item.id)">
-                                        <p style="font-size: 14px;"><i class="el-icon-tickets"></i>  {{item.videoName}}</p>
+                                        <img :src="item.photo" class="image" @click="getVideoPage(item.id, item.price)">
+                                        <span style="font-size: 14px;"><i class="el-icon-tickets"></i>  {{item.videoName}}</span>
+                                        &nbsp;
+                                        <el-tag type="danger" v-if="item.price === 0" size="mini">免费</el-tag>
+                                        <el-tag type="danger" v-else size="mini">￥{{item.price + '.00'}}</el-tag>
                                         <p style="font-size: 12px;  margin: 12px 0px;"><i class="el-icon-user"></i>  {{item.user.name}}</p>
                                         <p style="font-size: 12px;  margin: 12px 0px;"><i class="el-icon-date"></i>  {{item.createTime}}</p>
                                         <p style="font-size: 12px;  margin: 12px 0px;color: #9199A1;"><i class="el-icon-tickets"></i>   {{item.videoDesc}}</p>
@@ -153,7 +159,10 @@
                                 <el-col :span="6" v-for="(video, videoIndex) in pagination.list" :key="'video'+ videoIndex">
                                     <el-card :body-style="{ padding: '10px' }">
                                         <img :src="video.photo" class="image" @click="getVideoPage(video.id)">
-                                        <p style="font-size: 14px;"><i class="el-icon-tickets"></i>  {{video.videoName}}</p>
+                                        <span style="font-size: 14px;"><i class="el-icon-tickets"></i>  {{video.videoName}}</span>
+                                        &nbsp;
+                                        <el-tag type="danger" v-if="video.price === 0" size="mini">免费</el-tag>
+                                        <el-tag type="danger" v-else size="mini">￥{{video.price + '.00'}}</el-tag>
                                         <p style="font-size: 12px;  margin: 12px 0px;"><i class="el-icon-user"></i>  {{video.user.name}}</p>
                                         <p style="font-size: 12px;  margin: 12px 0px;"><i class="el-icon-date"></i>  {{video.createTime}}</p>
                                         <p style="font-size: 12px;  margin: 12px 0px;color: #9199A1;"><i class="el-icon-tickets"></i>  {{video.videoDesc}}</p>
@@ -164,7 +173,6 @@
                     </el-tab-pane>
                 </el-tabs>
             </div>
-
             <div id="pagination">
                 <div class="block" style="float: right;">
                     <el-pagination
@@ -186,9 +194,20 @@
                         :before-close="handleClose">
                     <span>您确定要购买该课程吗?</span>
                     <span slot="footer" class="dialog-footer">
-                        <el-button @click="handleClose">取 消</el-button>
+                        <el-button @click="dialogVisible = false">取 消</el-button>
                         <el-button type="primary" @click="handleConfirm">确 定</el-button>
                     </span>
+                </el-dialog>
+
+                <el-dialog
+                        title="VIP办理"
+                        :visible.sync="dialogVisible1"
+                        width="30%">
+                    <span>您确定要开通VIP吗?</span>
+                    <span slot="footer" class="dialog-footer">
+                <el-button @click="dialogVisible1 = false">取 消</el-button>
+                <el-button type="primary" @click="getVip">确 定</el-button>
+                </span>
                 </el-dialog>
             </div>
         </el-main>
@@ -206,6 +225,7 @@
     var vm = new Vue({
         el: "#video",
         data: {
+            mainVideoList:[],
             name: "",
             desc: "",
             prices: "",
@@ -221,7 +241,9 @@
             },
             activeName: "0",
             user: {},
-            dialogVisible:false
+            dialogVisible:false,
+            dialogVisible1: false,
+            loading: false
         },
         methods: {
             submitUpload() {
@@ -234,7 +256,10 @@
                         that.pagination = response.data.data
                     })
             },
-            getVideoPage(videoId) {
+            getVideoPage(videoId, price) {
+                if (price === 0) {
+                    window.location.href = "showVideo?videoId=" + videoId
+                }
                 if (this.user.id) {
                     let data = new FormData()
                     data.append("userId", this.user.id)
@@ -258,7 +283,6 @@
                 } else {
                     window.location.href = "login"
                 }
-
             },
             signOut() {
                 var token = window.localStorage["token"];
@@ -272,6 +296,7 @@
             },
             handleClick(tab, event) {
                 this.type = tab._props.name
+                this.pagination.pageNum = 1
                 this.$options.methods.showVideo(this)
             },
             currentChange(val) {
@@ -304,17 +329,46 @@
                             type: 'success'
                         });
                         _that.dialogVisible = false
+                        setTimeout(function (){
+                            window.location.href = "showVideo?videoId=" + _that.videoId
+                        }, 1000);
+
                     } else {
                         _that.$message.error('购买失败');
                     }
                 })
+            },
+            getVip() {
+                let data = new FormData();
+                let that = this
+                data.append("userId", this.user.id)
+                axios
+                    .post("user/getVip", data)
+                    .then(function (response) {
+                        if (response.data.data > 0) {
+                            that.$message({
+                                message: '恭喜你，成为尊贵的VIP',
+                                type: 'success'
+                            });
+                            that.user.isVip = true
+                        }
+                        that.dialogVisible1 = false
+                    })
+            },
+            async getRecommend(_that) {
+                await axios
+                    .post(" /video/recommend")
+                    .then(async function (response) {
+                        _that.mainVideoList = response.data.data
+                    })
             }
         },
 
 
         mounted () {
             //获取视频类型
-            var _that = this
+            let _that = this
+            _that.loading = true
             axios
                 .post("/enum/video_type")
                 .then(function (response) {
@@ -336,6 +390,10 @@
                 .then(function (response) {
                     _that.user = response.data.data
                 })
+
+            //获取轮播图推荐视频
+            this.getRecommend(_that)
+            _that.loading = false
         }
     })
 </script>
